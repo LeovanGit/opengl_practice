@@ -3,6 +3,12 @@
 #include <iostream>
 #include "shader.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "../include/stb_image.h"
+//#include <SOIL/SOIL.h> // Simple OpenGL Image Library
+                         // instead of stb_image.h
+                         // WARNING! SOIL needs to be compiled
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -33,41 +39,67 @@ int main()
     Shader shader("shaders/vertex.vert", "shaders/fragment.frag");
     
     float vertices[] = {
-        // vertices           colors 
-         0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f};
+        // vertices           colors           texture_coords
+         0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
+    // texture coords start from the left down corner
 
     unsigned int indices[] = {
         0, 1, 3,
         1, 2, 3};
 
-    unsigned int VBO; // Vertex Buffer Objects (stores vertices in GPU memory)
+    unsigned int VBO, IBO, VAO;
     glGenBuffers(1, &VBO);
-
-    unsigned int IBO; // Index Buffer Objects (sometimes EBO - Element Buffer)
     glGenBuffers(1, &IBO);
-
-    unsigned int VAO; // Vertex Array Objects (stores VBO attributes condition)
-    glGenVertexArrays(1, &VAO);    
+    glGenVertexArrays(1, &VAO);
 
     glBindVertexArray(VAO);
 
-    // only one buff can be binded to same target at the same time!
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1); 
 
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
     glBindVertexArray(0);
+
+    // TEXTURES (s, t, r)
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // set options (only on currently bind texture object)
+    // texture wrapping options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // for s axis
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // for t axis
+
+    // texture filtering options (for minifying and magnifying) 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int t_width, t_height, nrChannels;
+    unsigned char *texture_data = stbi_load("../assets/textures/texture_lava.jpg",
+                                            &t_width, 
+                                            &t_height,
+                                            &nrChannels,
+                                            0);
+    if (!texture_data) std::cout << "Error: can't load texture data\n";
+
+    // bind texture_data to texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(texture_data);
 
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 
@@ -79,10 +111,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader.use();
+        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        // 6 - vertices
-        // 0 - offset
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
