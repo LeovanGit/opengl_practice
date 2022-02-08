@@ -18,10 +18,6 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    #ifdef APPLE
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    #endif
-
     GLFWmonitor * monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode * mode = glfwGetVideoMode(monitor);
 
@@ -38,27 +34,39 @@ int main()
     
     float vertices[] = {
         // vertices           colors 
-        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-         0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f};
+         0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f};
+
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3};
 
     unsigned int VBO; // Vertex Buffer Objects (stores vertices in GPU memory)
     glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    unsigned int IBO; // Index Buffer Objects (sometimes EBO - Element Buffer)
+    glGenBuffers(1, &IBO);
 
     unsigned int VAO; // Vertex Array Objects (stores VBO attributes condition)
     glGenVertexArrays(1, &VAO);    
 
     glBindVertexArray(VAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) 0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
-    // 0 - location in vertex shader
-    // 3 - argument size in vertex shader
-    // 3 * sizeof(float) - step in bytes
-    // (void *)0 - offset in bytes
+
+    // only one buff can be binded to same target at the same time!
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1); 
+
     glBindVertexArray(0);
 
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
@@ -72,14 +80,17 @@ int main()
 
         shader.use();
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3); // from 0 index, count of 3
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        // 6 - vertices
+        // 0 - offset
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
     }
 
-    glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &IBO);
+    glDeleteVertexArrays(1, &VAO);
     glfwTerminate();
     return 0;
 }
