@@ -75,9 +75,13 @@ int main()
     glBindVertexArray(0);
 
     // TEXTURES (s, t, r)
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    // flip by y-axis, because OpenGL expects (0, 0) is bottom-left corner
+    // but usually its top-left
+    stbi_set_flip_vertically_on_load(true); 
+
+    unsigned int major_texture;
+    glGenTextures(1, &major_texture);
+    glBindTexture(GL_TEXTURE_2D, major_texture);
 
     // set options (only on currently bind texture object)
     // texture wrapping options
@@ -101,6 +105,32 @@ int main()
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(texture_data);
 
+    unsigned int minor_texture;
+    glGenTextures(1, &minor_texture);
+    glBindTexture(GL_TEXTURE_2D, minor_texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    texture_data = stbi_load("../assets/textures/texture_linux.png",
+                             &t_width, 
+                             &t_height,
+                             &nrChannels,
+                             0);
+    if (!texture_data) std::cout << "Error: can't load texture data\n";
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(texture_data);
+
+    // pass texture units to shader
+    shader.use();
+    glUniform1i(glGetUniformLocation(shader.get_id(), "u_major_texture"), 0); // 0 - unit index
+    glUniform1i(glGetUniformLocation(shader.get_id(), "u_minor_texture"), 1);
+
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 
     while (!glfwWindowShouldClose(window))
@@ -111,7 +141,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader.use();
-        glBindTexture(GL_TEXTURE_2D, texture);
+
+        // texture units
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, major_texture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, minor_texture);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
