@@ -1,13 +1,16 @@
+#include <iostream>
+
 #include <glad/glad.h>  // loads pointers to OpenGL functions at runtime
 #include <GLFW/glfw3.h> // creating windows and handle user input
-#include <iostream>
+
 #include "shader.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/stb_image.h"
-//#include <SOIL/SOIL.h> // Simple OpenGL Image Library
-                         // instead of stb_image.h
-                         // WARNING! SOIL needs to be compiled
+
+#include <glm/glm.hpp> // OpenGL Mathematics
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -44,7 +47,6 @@ int main()
          0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
         -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
         -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
-    // texture coords start from the left down corner
 
     unsigned int indices[] = {
         0, 1, 3,
@@ -74,33 +76,26 @@ int main()
 
     glBindVertexArray(0);
 
-    // TEXTURES (s, t, r)
-    // flip by y-axis, because OpenGL expects (0, 0) is bottom-left corner
-    // but usually its top-left
+    // Textures(s, t, r)
     stbi_set_flip_vertically_on_load(true); 
 
     unsigned int major_texture;
     glGenTextures(1, &major_texture);
     glBindTexture(GL_TEXTURE_2D, major_texture);
 
-    // set options (only on currently bind texture object)
-    // texture wrapping options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // for s axis
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // for t axis
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    // texture filtering options (for minifying and magnifying) 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    int t_width, t_height, nrChannels;
+    int t_width, t_height, nr_channels;
     unsigned char *texture_data = stbi_load("../assets/textures/texture_lava.jpg",
                                             &t_width, 
                                             &t_height,
-                                            &nrChannels,
+                                            &nr_channels,
                                             0);
-    if (!texture_data) std::cout << "Error: can't load texture data\n";
 
-    // bind texture_data to texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(texture_data);
@@ -118,9 +113,8 @@ int main()
     texture_data = stbi_load("../assets/textures/texture_linux.png",
                              &t_width, 
                              &t_height,
-                             &nrChannels,
+                             &nr_channels,
                              0);
-    if (!texture_data) std::cout << "Error: can't load texture data\n";
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -128,19 +122,52 @@ int main()
 
     // pass texture units to shader
     shader.use();
-    glUniform1i(glGetUniformLocation(shader.get_id(), "u_major_texture"), 0); // 0 - unit index
+    glUniform1i(glGetUniformLocation(shader.get_id(), "u_major_texture"), 0);
     glUniform1i(glGetUniformLocation(shader.get_id(), "u_minor_texture"), 1);
 
+    // transformations
+    // rule: scale -> rotate -> translate
+    glm::mat4 model_matrix = glm::mat4(1.0f);
+    model_matrix = glm::translate(model_matrix, glm::vec3(-0.5f, -0.2f, 0.0f));
+    model_matrix = glm::rotate(model_matrix, glm::radians(55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    // read from right to left, here (trans * rotate * vec): first rotate then translate
+
+    glm::mat4 view_matrix = glm::mat4(1.0f);
+    view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -3.0f));
+    // move camera by 3.0 on z-axis (same as move all object by -3.0 on z-asix)
+
+    glm::mat4 proj_matrix = glm::perspective(glm::radians(45.0f),
+                                             float(mode->width) / mode->height,
+                                             0.1f,
+                                             100.0f);
+    // glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
+
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+    glEnable(GL_DEPTH_TEST); // from the polygons overlap
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         glfwSetKeyCallback(window, key_callback);
         
-        glClear(GL_COLOR_BUFFER_BIT);
+        // clear screen by ClearColor and clear Z-buffer (which store info about vertex depth)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.use();
+
+        // transformations
+        glUniformMatrix4fv(glGetUniformLocation(shader.get_id(), "model_matrix"),
+                           1,
+                           GL_FALSE,
+                           glm::value_ptr(model_matrix));
+        glUniformMatrix4fv(glGetUniformLocation(shader.get_id(), "view_matrix"),
+                           1,
+                           GL_FALSE,
+                           glm::value_ptr(view_matrix));
+        glUniformMatrix4fv(glGetUniformLocation(shader.get_id(), "proj_matrix"),
+                           1,
+                           GL_FALSE,
+                           glm::value_ptr(proj_matrix));
 
         // texture units
         glActiveTexture(GL_TEXTURE0);
