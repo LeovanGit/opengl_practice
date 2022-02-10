@@ -12,6 +12,23 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+float move_speed = 5.0f;
+float rotation_speed = 1.0f;
+
+glm::vec3 camera_pos(0.0f, 0.0f, 3.0f);
+glm::vec3 camera_ray(0.0f, 0.0f, -1.0f);
+glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
+
+float prev_time = 0;
+float delta_time = 0;
+
+void calc_delta_time()
+{
+    float current_time = glfwGetTime();
+    delta_time = current_time - prev_time;
+    prev_time = current_time;
+}
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -141,6 +158,19 @@ int main()
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(texture_data);
 
+    glm::vec3 cube_coords[] = {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(-2.4f, -0.4f, -3.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(2.0f,  5.0f, -15.0f)};
+
+    // transformations
+    glm::mat4 proj_matrix = glm::perspective(glm::radians(45.0f),
+                                             float(mode->width) / mode->height,
+                                             0.1f,
+                                             100.0f);
+
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
@@ -151,42 +181,36 @@ int main()
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // delta_time - time between two near frames, to avoid speed by fps dependency
+        calc_delta_time();
+
         shader.use();
 
         // transformations
-        // rule: scale -> rotate -> translate
-        glm::mat4 model_matrix = glm::mat4(1.0f);
-        model_matrix = glm::rotate(model_matrix,
-                                   glm::radians(25.0f),
-                                   glm::vec3(1.0f, 0.0f, 0.0f));
-        model_matrix = glm::rotate(model_matrix,
-                                   glm::radians((float)glfwGetTime() * 25),
-                                   glm::vec3(0.0f, 1.0f, 0.0f));
-
-        glm::mat4 view_matrix = glm::mat4(1.0f);
-        view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -3.0f));
-
-        glm::mat4 proj_matrix = glm::perspective(glm::radians(45.0f),
-                                                 float(mode->width) / mode->height,
-                                                 0.1f,
-                                                 100.0f);
-
-        glUniformMatrix4fv(glGetUniformLocation(shader.get_id(), "model_matrix"),
-                           1,
-                           GL_FALSE,
-                           glm::value_ptr(model_matrix));
+        glm::mat4 view_matrix = glm::lookAt(camera_pos, camera_pos + camera_ray, camera_up);
         glUniformMatrix4fv(glGetUniformLocation(shader.get_id(), "view_matrix"),
                            1,
                            GL_FALSE,
                            glm::value_ptr(view_matrix));
+
         glUniformMatrix4fv(glGetUniformLocation(shader.get_id(), "proj_matrix"),
                            1,
                            GL_FALSE,
                            glm::value_ptr(proj_matrix));
 
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+        for (int i = 0; i != 5; ++i)
+        {
+            glm::mat4 model_matrix = glm::mat4(1.0f);
+            model_matrix = glm::translate(model_matrix, cube_coords[i]);
+            model_matrix = glm::rotate(model_matrix, glm::radians(i * 15.0f), glm::vec3(0.3, 1.0, 0.6));
+            glUniformMatrix4fv(glGetUniformLocation(shader.get_id(), "model_matrix"),
+                               1,
+                               GL_FALSE,
+                               glm::value_ptr(model_matrix));            
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glBindVertexArray(0);
+        }
 
         glfwSwapBuffers(window);
     }
@@ -199,12 +223,22 @@ int main()
 
 void key_callback(GLFWwindow * window, int key, int scancode, int action, int mode)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) 
         glfwSetWindowShouldClose(window, true);
     
-    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) 
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    if (key == GLFW_KEY_R && action == GLFW_RELEASE)
+    if (key == GLFW_KEY_R && action == GLFW_RELEASE) 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+    if (key == GLFW_KEY_W)
+        camera_pos += camera_ray * move_speed * delta_time;
+    if (key == GLFW_KEY_S) 
+        camera_pos -= camera_ray * move_speed * delta_time;
+    if (key == GLFW_KEY_A) 
+        // cross product = vec3 which orthogonal to camera_up and camera_ray
+        // (dont forget OpenGL using right side axis system)
+        camera_pos -= glm::normalize(glm::cross(camera_ray, camera_up)) * move_speed * delta_time;
+    if (key == GLFW_KEY_D)
+        camera_pos += glm::normalize(glm::cross(camera_ray, camera_up)) * move_speed * delta_time;
 }
