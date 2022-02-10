@@ -43,14 +43,28 @@ int main()
     
     float vertices[] = {
         // vertices           colors           texture_coords
-         0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
+         0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
 
     unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3};
+        7, 6, 4, // up
+        5, 6, 4,
+        3, 4, 0, // front
+        5, 4, 0,
+        5, 6, 0, // right
+        1, 6, 0,
+        6, 1, 7, // back
+        2, 1, 7,
+        4, 7, 3, // left
+        2, 7, 3,
+        0, 3, 1, // down
+        2, 3, 1};
 
     unsigned int VBO, IBO, VAO;
     glGenBuffers(1, &VBO);
@@ -125,37 +139,36 @@ int main()
     glUniform1i(glGetUniformLocation(shader.get_id(), "u_major_texture"), 0);
     glUniform1i(glGetUniformLocation(shader.get_id(), "u_minor_texture"), 1);
 
-    // transformations
-    // rule: scale -> rotate -> translate
-    glm::mat4 model_matrix = glm::mat4(1.0f);
-    model_matrix = glm::translate(model_matrix, glm::vec3(-0.5f, -0.2f, 0.0f));
-    model_matrix = glm::rotate(model_matrix, glm::radians(55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    // read from right to left, here (trans * rotate * vec): first rotate then translate
-
-    glm::mat4 view_matrix = glm::mat4(1.0f);
-    view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -3.0f));
-    // move camera by 3.0 on z-axis (same as move all object by -3.0 on z-asix)
-
-    glm::mat4 proj_matrix = glm::perspective(glm::radians(45.0f),
-                                             float(mode->width) / mode->height,
-                                             0.1f,
-                                             100.0f);
-    // glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
-
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-    glEnable(GL_DEPTH_TEST); // from the polygons overlap
+    glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         glfwSetKeyCallback(window, key_callback);
         
-        // clear screen by ClearColor and clear Z-buffer (which store info about vertex depth)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.use();
 
         // transformations
+        // rule: scale -> rotate -> translate
+        glm::mat4 model_matrix = glm::mat4(1.0f);
+        model_matrix = glm::rotate(model_matrix,
+                                   glm::radians(25.0f),
+                                   glm::vec3(1.0f, 0.0f, 0.0f));
+        model_matrix = glm::rotate(model_matrix,
+                                   glm::radians((float)glfwGetTime() * 25),
+                                   glm::vec3(0.0f, 1.0f, 0.0f));
+
+        glm::mat4 view_matrix = glm::mat4(1.0f);
+        view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -3.0f));
+
+        glm::mat4 proj_matrix = glm::perspective(glm::radians(45.0f),
+                                                 float(mode->width) / mode->height,
+                                                 0.1f,
+                                                 100.0f);
+
         glUniformMatrix4fv(glGetUniformLocation(shader.get_id(), "model_matrix"),
                            1,
                            GL_FALSE,
@@ -176,7 +189,7 @@ int main()
         glBindTexture(GL_TEXTURE_2D, minor_texture);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
