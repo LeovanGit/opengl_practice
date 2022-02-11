@@ -22,6 +22,8 @@ glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
 float prev_time = 0;
 float delta_time = 0;
 
+bool keys[348]; // 348 keys defined in GLFW
+
 void calc_delta_time()
 {
     float current_time = glfwGetTime();
@@ -35,6 +37,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 void key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
+void move();
 
 int main()
 {
@@ -176,13 +179,14 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
+        calc_delta_time();
+
         glfwPollEvents();
         glfwSetKeyCallback(window, key_callback);
         
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        move();
 
-        // delta_time - time between two near frames, to avoid speed by fps dependency
-        calc_delta_time();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.use();
 
@@ -231,14 +235,22 @@ void key_callback(GLFWwindow * window, int key, int scancode, int action, int mo
     if (key == GLFW_KEY_R && action == GLFW_RELEASE) 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    if (key == GLFW_KEY_W)
+    if (action == GLFW_PRESS) 
+        keys[key] = true;
+    else if (action == GLFW_RELEASE)
+        keys[key] = false;
+}
+
+// save all keys which was pressed last frame in keys bool array and then react
+// this will give more smoother movement
+void move()
+{
+    if (keys[GLFW_KEY_W])
         camera_pos += camera_ray * move_speed * delta_time;
-    if (key == GLFW_KEY_S) 
+    if (keys[GLFW_KEY_S]) 
         camera_pos -= camera_ray * move_speed * delta_time;
-    if (key == GLFW_KEY_A) 
-        // cross product = vec3 which orthogonal to camera_up and camera_ray
-        // (dont forget OpenGL using right side axis system)
+    if (keys[GLFW_KEY_A]) 
         camera_pos -= glm::normalize(glm::cross(camera_ray, camera_up)) * move_speed * delta_time;
-    if (key == GLFW_KEY_D)
+    if (keys[GLFW_KEY_D])
         camera_pos += glm::normalize(glm::cross(camera_ray, camera_up)) * move_speed * delta_time;
 }
