@@ -13,7 +13,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 float move_speed = 5.0f;
-float rotation_speed = 1.0f;
+float rotation_speed = 0.15f;
 
 glm::vec3 camera_pos(0.0f, 0.0f, 3.0f);
 glm::vec3 camera_ray(0.0f, 0.0f, -1.0f);
@@ -21,6 +21,11 @@ glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
 
 float prev_time = 0;
 float delta_time = 0;
+
+float last_mouse_x = 0;
+float last_mouse_y = 0;
+float yaw = -90.0f;
+float pitch = 0;
 
 bool keys[348]; // 348 keys defined in GLFW
 
@@ -37,7 +42,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 void key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
+void mouse_callback(GLFWwindow * window, double x_pos, double y_pos);
 void move();
+void rotate();
 
 int main()
 {
@@ -55,6 +62,12 @@ int main()
                                            "OpenGL practice",
                                            monitor,
                                            nullptr);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    last_mouse_x = mode->width / 2;
+    last_mouse_y = mode->height / 2;
+    glfwSetCursorPos(window, last_mouse_x, last_mouse_y);
+
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -183,8 +196,10 @@ int main()
 
         glfwPollEvents();
         glfwSetKeyCallback(window, key_callback);
+        glfwSetCursorPosCallback(window, mouse_callback);
         
         move();
+        rotate();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -241,8 +256,6 @@ void key_callback(GLFWwindow * window, int key, int scancode, int action, int mo
         keys[key] = false;
 }
 
-// save all keys which was pressed last frame in keys bool array and then react
-// this will give more smoother movement
 void move()
 {
     if (keys[GLFW_KEY_W])
@@ -253,4 +266,26 @@ void move()
         camera_pos -= glm::normalize(glm::cross(camera_ray, camera_up)) * move_speed * delta_time;
     if (keys[GLFW_KEY_D])
         camera_pos += glm::normalize(glm::cross(camera_ray, camera_up)) * move_speed * delta_time;
+}
+
+void mouse_callback(GLFWwindow * window, double mouse_x, double mouse_y)
+{
+    float offset_x = mouse_x - last_mouse_x;
+    float offset_y =  last_mouse_y - mouse_y;
+    glfwSetCursorPos(window, last_mouse_x, last_mouse_y);
+
+    yaw += offset_x * rotation_speed;
+    pitch += offset_y * rotation_speed;
+    
+    if (pitch > 89.0f) pitch = 89.0f;
+    else if (pitch < -89.0f) pitch = -89.0f;
+}
+
+// Euler angles
+void rotate()
+{
+    camera_ray.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+    camera_ray.y = glm::sin(glm::radians(pitch));
+    camera_ray.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+    camera_ray = glm::normalize(camera_ray);
 }
