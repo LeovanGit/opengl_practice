@@ -14,6 +14,7 @@
 
 float move_speed = 5.0f;
 float rotation_speed = 0.15f;
+float zoom_speed = 1.0f;
 
 glm::vec3 camera_pos(0.0f, 0.0f, 3.0f);
 glm::vec3 camera_ray(0.0f, 0.0f, -1.0f);
@@ -24,8 +25,11 @@ float delta_time = 0;
 
 double last_mouse_x = 0;
 double last_mouse_y = 0;
+
 float yaw = -90.0f;
 float pitch = 0;
+
+float fov = 45.0f;
 
 bool keys[348]; // 348 keys defined in GLFW
 
@@ -43,6 +47,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow * window, double x_pos, double y_pos);
+void scroll_callback(GLFWwindow * window, double x_offset, double y_offset);
 void move();
 void rotate();
 
@@ -180,12 +185,6 @@ int main()
         glm::vec3(1.5f,  0.2f, -1.5f),
         glm::vec3(2.0f,  5.0f, -15.0f)};
 
-    // transformations
-    glm::mat4 proj_matrix = glm::perspective(glm::radians(45.0f),
-                                             float(mode->width) / mode->height,
-                                             0.1f,
-                                             100.0f);
-
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
@@ -196,6 +195,7 @@ int main()
         glfwPollEvents();
         glfwSetKeyCallback(window, key_callback);
         glfwSetCursorPosCallback(window, mouse_callback);
+        glfwSetScrollCallback(window, scroll_callback);
         
         move();
         rotate();
@@ -205,6 +205,11 @@ int main()
         shader.use();
 
         // transformations
+        glm::mat4 proj_matrix = glm::perspective(glm::radians(fov),
+                                                 float(mode->width) / mode->height,
+                                                 0.1f,
+                                                 100.0f);
+
         glm::mat4 view_matrix = glm::lookAt(camera_pos, camera_pos + camera_ray, camera_up);
         glUniformMatrix4fv(glGetUniformLocation(shader.get_id(), "view_matrix"),
                            1,
@@ -287,4 +292,11 @@ void rotate()
     camera_ray.y = glm::sin(glm::radians(pitch));
     camera_ray.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
     camera_ray = glm::normalize(camera_ray);
+}
+
+void scroll_callback(GLFWwindow * window, double x_offset, double y_offset)
+{
+    fov -= float(y_offset);
+    if (fov < 1.0f) fov = 1.0f;
+    else if (fov > 45.0f) fov = 45.0f;
 }
