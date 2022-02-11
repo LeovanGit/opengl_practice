@@ -22,8 +22,8 @@ glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
 float prev_time = 0;
 float delta_time = 0;
 
-float last_mouse_x = 0;
-float last_mouse_y = 0;
+double last_mouse_x = 0;
+double last_mouse_y = 0;
 float yaw = -90.0f;
 float pitch = 0;
 
@@ -62,15 +62,14 @@ int main()
                                            "OpenGL practice",
                                            monitor,
                                            nullptr);
-
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    last_mouse_x = mode->width / 2;
-    last_mouse_y = mode->height / 2;
-    glfwSetCursorPos(window, last_mouse_x, last_mouse_y);
-
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    last_mouse_x = mode->width / 2;
+    last_mouse_y = mode->height / 2;
+    glfwSetCursorPos(window, last_mouse_x, last_mouse_y);
 
     Shader shader("shaders/vertex.vert", "shaders/fragment.frag");
     
