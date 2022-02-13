@@ -1,7 +1,7 @@
 # Compilation
 
 ```
-g++ -Wall -lglfw -ldl main.cpp ../include/glad.c shader.cpp && ./a.out
+g++ -Wall -lglfw -ldl main.cpp ../include/glad.c shader.cpp camera.cpp && ./a.out
 ```
 
 -lglfw: GLFW library

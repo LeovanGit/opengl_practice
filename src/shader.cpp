@@ -1,7 +1,9 @@
 #include <fstream>
 #include <iostream>
 #include <glad/glad.h>
-#include "shader.h"
+#include <glm/gtc/type_ptr.hpp>
+
+#include "shader.hpp"
 
 #define SHADER 0
 #define SHADER_PROGRAM 1
@@ -37,6 +39,14 @@ Shader::Shader(std::string vert_path, std::string frag_path)
 void Shader::use() { glUseProgram(id); }
 
 unsigned int Shader::get_id() { return id; }
+
+void Shader::set_uniform_mat4(const char * uniform_name, glm::mat4 matrix)
+{        
+    glUniformMatrix4fv(glGetUniformLocation(id, uniform_name),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(matrix));
+}
 
 std::string Shader::read_from_file(std::string path)
 {
