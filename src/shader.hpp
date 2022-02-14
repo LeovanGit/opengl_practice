@@ -9,9 +9,9 @@ class Shader
 public:
     Shader(std::string vert_path, std::string frag_path);
 
-    void use();
+    void use() const;
 
-    unsigned int get_id();
+    unsigned int get_id() const;
 
     void set_uniform_mat4(const std::string &uniform_name, glm::mat4 matrix);
 

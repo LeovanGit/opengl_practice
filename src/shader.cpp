@@ -36,9 +36,9 @@ Shader::Shader(std::string vert_path, std::string frag_path)
     glDeleteShader(frag_shader);
 }
 
-void Shader::use() { glUseProgram(id); }
+void Shader::use() const { glUseProgram(id); }
 
-unsigned int Shader::get_id() { return id; }
+unsigned int Shader::get_id() const { return id; }
 
 void Shader::set_uniform_mat4(const std::string &uniform_name, glm::mat4 matrix)
 {        

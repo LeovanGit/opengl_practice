@@ -2,7 +2,9 @@
 
 uniform vec3 u_object_color;
 uniform vec3 u_light_color;
+
 uniform vec3 light_position;
+uniform vec3 camera_position;
 
 in vec3 vert_v_normal;
 in vec3 vert_frag_position;
@@ -18,5 +20,14 @@ void main()
     float cosa = max(dot(ray, vert_v_normal), 0.0f);
     vec3 diffuse = cosa * u_light_color;
 
-    frag_color = vec4(u_object_color * (ambient + diffuse), 1.0);
+    float specular_strength = 1.0f;
+    float shininess = 256;
+    vec3 view_ray = normalize(camera_position - vert_frag_position);
+    // same as law of reflection in vector form:
+    // reflected_ray = ray - 2 * dot(ray, normal) * normal;
+    vec3 reflected_ray = reflect(-ray, vert_v_normal);
+    float cosb = pow(max(dot(reflected_ray, view_ray), 0.0f), shininess);
+    vec3 specular = specular_strength * cosb * u_light_color;
+
+    frag_color = vec4(u_object_color * (ambient + diffuse + specular), 1.0);
 }

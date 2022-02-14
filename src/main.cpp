@@ -27,7 +27,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f),
               5.0f,
               0.1);
 
-glm::vec3 light_position(1.2f, 1.5f, 2.0f);
+glm::vec3 light_position(1.2f, 0.5f, 3.0f);
 
 void calc_delta_time()
 {
@@ -77,7 +77,7 @@ int main()
     Shader light_shader("shaders/light_vertex.vert", "shaders/light_fragment.frag");
     
     float vertices[] = {
-        // vertices         
+        // vertices           normal
         // up
         -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
          0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
@@ -205,6 +205,8 @@ int main()
         shader.set_uniform_mat4("proj_matrix", proj_matrix);
 
         shader.set_uniform_vec3("light_position", light_position);
+        shader.set_uniform_vec3("camera_position", camera.get_position());
+
         shader.set_uniform_vec3("u_object_color", glm::vec3(1.0f, 0.5f, 0.31f));
         shader.set_uniform_vec3("u_light_color", glm::vec3(1.0f, 1.0f, 1.0f));
 

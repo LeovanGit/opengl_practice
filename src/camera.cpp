@@ -16,7 +16,9 @@ Camera::Camera(glm::vec3 position, glm::vec3 ray, glm::vec3 up,
 
 glm::mat4 Camera::get_view_matrix() const { return glm::lookAt(position, position + ray, up); }
 
-float Camera::get_fov() { return fov; }
+float Camera::get_fov() const { return fov; }
+
+glm::vec3 Camera::get_position() const { return position; }
 
 void Camera::move(bool *keys)
 {

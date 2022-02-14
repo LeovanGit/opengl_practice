@@ -11,7 +11,9 @@ public:
 
     glm::mat4 get_view_matrix() const;
 
-    float get_fov();
+    float get_fov() const;
+
+    glm::vec3 get_position() const;
 
     void move(bool *keys);
 
