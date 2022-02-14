@@ -27,7 +27,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f),
               5.0f,
               0.1);
 
-glm::vec3 light_position(1.2f, 1.0f, -2.0f);
+glm::vec3 light_position(1.2f, 1.5f, 2.0f);
 
 void calc_delta_time()
 {
@@ -79,58 +79,58 @@ int main()
     float vertices[] = {
         // vertices         
         // up
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
 
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
 
         // front
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
 
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
 
          // right
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
 
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
 
          // back
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
 
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
 
         // left
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f, 0.0f, 0.0f,
 
-        -0.5f, -0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f, 0.0f, 0.0f,
 
         // down
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, -1.0f, 0.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
 
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f, -0.5f};
+        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, -1.0f, 0.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f};
 
     unsigned int VBO, VAO, light_VAO;
     glGenBuffers(1, &VBO);
@@ -142,15 +142,17 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
 
     glBindVertexArray(light_VAO);
     
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     glBindVertexArray(0);
@@ -170,7 +172,7 @@ int main()
         camera.move(keys);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+ 
         glm::mat4 proj_matrix = glm::perspective(glm::radians(camera.get_fov()),
                                                  float(mode->width) / mode->height,
                                                  0.1f,
@@ -195,11 +197,14 @@ int main()
         shader.use();
 
         model_matrix = glm::mat4(1.0f);
+        model_matrix = glm::rotate(model_matrix, float(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+        model_matrix = glm::scale(model_matrix, glm::vec3(glm::min(float(glfwGetTime()), 1.0f)));
         
         shader.set_uniform_mat4("model_matrix", model_matrix);
         shader.set_uniform_mat4("view_matrix", camera.get_view_matrix());
         shader.set_uniform_mat4("proj_matrix", proj_matrix);
 
+        shader.set_uniform_vec3("light_position", light_position);
         shader.set_uniform_vec3("u_object_color", glm::vec3(1.0f, 0.5f, 0.31f));
         shader.set_uniform_vec3("u_light_color", glm::vec3(1.0f, 1.0f, 1.0f));
 
