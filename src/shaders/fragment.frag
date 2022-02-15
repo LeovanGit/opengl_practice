@@ -13,18 +13,16 @@ out vec4 frag_color;
 
 void main()
 {
-    float ambient_strength = 0.1f;
+    float ambient_strength = 0.2f;
     vec3 ambient = ambient_strength * u_light_color;
 
     vec3 ray = normalize(light_position - vert_frag_position);
     float cosa = max(dot(ray, vert_v_normal), 0.0f);
     vec3 diffuse = cosa * u_light_color;
 
-    float specular_strength = 1.0f;
-    float shininess = 256;
+    float specular_strength = 0.5f;
+    float shininess = 128;
     vec3 view_ray = normalize(camera_position - vert_frag_position);
-    // same as law of reflection in vector form:
-    // reflected_ray = ray - 2 * dot(ray, normal) * normal;
     vec3 reflected_ray = reflect(-ray, vert_v_normal);
     float cosb = pow(max(dot(reflected_ray, view_ray), 0.0f), shininess);
     vec3 specular = specular_strength * cosb * u_light_color;
