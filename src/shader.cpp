@@ -40,12 +40,9 @@ void Shader::use() const { glUseProgram(id); }
 
 unsigned int Shader::get_id() const { return id; }
 
-void Shader::set_uniform_mat4(const std::string &uniform_name, glm::mat4 matrix)
-{        
-    glUniformMatrix4fv(glGetUniformLocation(id, uniform_name.c_str()),
-                       1,
-                       GL_FALSE,
-                       glm::value_ptr(matrix));
+void Shader::set_uniform_float(const std::string &uniform_name, float value)
+{
+    glUniform1f(glGetUniformLocation(id, uniform_name.c_str()), value);
 }
 
 void Shader::set_uniform_vec3(const std::string &uniform_name, glm::vec3 vector)
@@ -53,6 +50,14 @@ void Shader::set_uniform_vec3(const std::string &uniform_name, glm::vec3 vector)
     glUniform3fv(glGetUniformLocation(id, uniform_name.c_str()),
                  1,
                  glm::value_ptr(vector));
+}
+
+void Shader::set_uniform_mat4(const std::string &uniform_name, glm::mat4 matrix)
+{        
+    glUniformMatrix4fv(glGetUniformLocation(id, uniform_name.c_str()),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(matrix));
 }
 
 std::string Shader::read_from_file(std::string path)

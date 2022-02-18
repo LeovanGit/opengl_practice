@@ -13,9 +13,11 @@ public:
 
     unsigned int get_id() const;
 
-    void set_uniform_mat4(const std::string &uniform_name, glm::mat4 matrix);
+    void set_uniform_float(const std::string &uniform_name, float value);
 
     void set_uniform_vec3(const std::string &uniform_name, glm::vec3 vector);
+
+    void set_uniform_mat4(const std::string &uniform_name, glm::mat4 matrix);
 
 private:
     std::string read_from_file(std::string path);

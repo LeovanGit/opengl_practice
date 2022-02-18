@@ -204,11 +204,17 @@ int main()
         shader.set_uniform_mat4("view_matrix", camera.get_view_matrix());
         shader.set_uniform_mat4("proj_matrix", proj_matrix);
 
-        shader.set_uniform_vec3("light_position", light_position);
         shader.set_uniform_vec3("camera_position", camera.get_position());
 
-        shader.set_uniform_vec3("u_object_color", glm::vec3(0.08f, 0.22f, 0.54f));
-        shader.set_uniform_vec3("u_light_color", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader.set_uniform_vec3("material.ambient", glm::vec3(0.08f, 0.22f, 0.54f));
+        shader.set_uniform_vec3("material.diffuse", glm::vec3(0.08f, 0.22f, 0.54f));
+        shader.set_uniform_vec3("material.specular", glm::vec3(0.5f));
+        shader.set_uniform_float("material.shininess", 32.0f);
+
+        shader.set_uniform_vec3("light.position", light_position);
+        shader.set_uniform_vec3("light.ambient", glm::vec3(0.2f));
+        shader.set_uniform_vec3("light.diffuse", glm::vec3(0.4f));
+        shader.set_uniform_vec3("light.specular", glm::vec3(0.5f));
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
