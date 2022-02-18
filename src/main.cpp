@@ -28,7 +28,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f),
               0.1);
 
 //glm::vec3 light_position(1.8f, 0.5f, 3.0f);
-glm::vec3 light_position(0.0f, 3.0f, 5.0f);
+glm::vec3 light_position(0.0f, 1.0f, 10.0f);
 
 
 class Material
@@ -213,17 +213,6 @@ int main()
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
-    glm::vec3 cubes[] = {
-        glm::vec3( 0.0f, 0.0f, 0.0f),
-        glm::vec3( 1.5f, 0.0f, 0.0f),
-        glm::vec3( 3.0f, 0.0f, 0.0f),
-        glm::vec3(-1.5f, 0.0f, 0.0f),
-
-        glm::vec3( 0.0f, 1.5f, 0.0f),
-        glm::vec3( 1.5f, 1.5f, 0.0f),
-        glm::vec3( 3.0f, 1.5f, 0.0f),
-        glm::vec3(-1.5f, 1.5f, 0.0f)};
-
     Material cube_materials[] = {
         gold,
         obsidian,
@@ -273,9 +262,10 @@ int main()
         for (int i = 0; i != 8; ++i)
         {
             model_matrix = glm::mat4(1.0f);
-            model_matrix = glm::translate(model_matrix, cubes[i]);
-          // model_matrix = glm::rotate(model_matrix, float(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
-          // model_matrix = glm::scale(model_matrix, glm::vec3(glm::min(float(glfwGetTime()), 1.0f)));
+            model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 3.0f, 0.0f));
+            model_matrix = glm::rotate(model_matrix, float(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+            model_matrix = glm::rotate(model_matrix, glm::radians(i * 45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, -3.0f, 0.0f));
 
             shader.set_uniform_mat4("model_matrix", model_matrix);
             shader.set_uniform_mat4("view_matrix", camera.get_view_matrix());
