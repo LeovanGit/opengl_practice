@@ -123,11 +123,11 @@ int main()
     last_mouse_y = mode->height / 2;
     glfwSetCursorPos(window, last_mouse_x, last_mouse_y);
 
-    Shader shader("shaders/vertex.vert", "shaders/fragment.frag");
+    Shader shader("../src/shaders/vertex.vert", "../src/shaders/fragment.frag");
 
     // now light source color not depends from lightning calculations (like other objects)
     // its always bright (1.0f, 1.0f, 1.0f, 1.0f)
-    Shader light_shader("shaders/light_vertex.vert", "shaders/light_fragment.frag");
+    Shader light_shader("../src/shaders/light_vertex.vert", "../src/shaders/light_fragment.frag");
     
     float vertices[] = {
         // vertices           normal

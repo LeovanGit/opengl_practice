@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/demo.dir/src/main.cpp.o CMakeFiles/demo.dir/include/glad.c.o CMakeFiles/demo.dir/src/shader.cpp.o CMakeFiles/demo.dir/src/camera.cpp.o -o demo  -lglfw -ldl 
